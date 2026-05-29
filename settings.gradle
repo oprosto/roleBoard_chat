@@ -1,0 +1,4 @@
+rootProject.name = 'chat'
+
+includeBuild('../libs/security-lib')
+includeBuild('../libs/core')

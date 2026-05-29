@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini Chat STOMP</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #chat { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column-reverse; }
+        .message { margin: 5px 0; }
+        input[type=text] { width: 80%; padding: 5px; }
+        button { padding: 5px 10px; }
+    </style>
+</head>
+<body>
+<h2>Mini Chat</h2>
+<div id="chat"></div>
+<input type="text" id="msgInput" placeholder="Type a message...">
+<button id="sendBtn">Send</button>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+
+<script>
+    const chatDiv = document.getElementById("chat");
+    const msgInput = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    // 1️⃣ Подключаемся к SockJS endpoint на сервере
+    const socket = new SockJS('http://localhost:8080/ws/chat');
+    const stompClient = Stomp.over(socket);
+
+    // 2️⃣ Подключаем STOMP
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+
+        // 3️⃣ Подписка на топик сообщений
+        stompClient.subscribe('/topic/messages', function (message) {
+            const msgElem = document.createElement("div");
+            msgElem.textContent = message.body;
+            msgElem.classList.add("message");
+            chatDiv.prepend(msgElem); // Добавляем сверху
+        });
+    });
+
+    // 4️⃣ Отправка сообщений через STOMP
+    sendBtn.onclick = function() {
+        const message = msgInput.value.trim();
+        if (message) {
+            // /app/send — путь, который будет обработан @MessageMapping на сервере
+            stompClient.send("/app/send", {}, message);
+            msgInput.value = "";
+        }
+    };
+
+    // Отправка по Enter
+    msgInput.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") sendBtn.click();
+    });
+</script>
+</body>
+</html>
