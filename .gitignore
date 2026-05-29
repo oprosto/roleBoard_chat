@@ -1,0 +1,35 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Ignored default folder with query files
+/queries/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Gradle build folders
+build/
+**/build/
+*/build/
+*/*/build/
+.gradle/
+**/.gradle/
+
+# Gradle specific files
+.gradle/
+*.lock
+*.bin
+**/*.lock
+**/*.bin
+
+# Gradle wrapper (но не кэш)
+!gradle-wrapper.jar
+gradle-wrapper.properties
+
+# IDE build folders
+out/
+**/out/
+bin/
+**/bin/
+/HELP.md

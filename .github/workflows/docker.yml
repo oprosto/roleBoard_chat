@@ -1,0 +1,36 @@
+name: docker.yml
+on:
+  push:
+    branches:
+      - master_chat
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout chat-service
+        uses: actions/checkout@v4
+
+      - name: Checkout libs
+        uses: actions/checkout@v4
+        with:
+          repository: oprosto/core-lib
+          path: ./libs
+
+      - name: Login to docker
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./chat/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/service-a:latest
+
+
+
+
+

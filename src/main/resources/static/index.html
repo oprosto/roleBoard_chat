@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini Chat STOMP</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #chat { border: 1px solid #ccc; height: 400px; overflow-y: auto; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; }
+        .message { margin: 5px 0; }
+        .message.self { font-weight: bold; color: green; }
+        .message.other { color: blue; }
+        input[type=text], input[type=number] { padding: 5px; margin-right: 5px; }
+        button { padding: 5px 10px; }
+        #login { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+<h2>Mini Chat</h2>
+
+<div id="login">
+    Chat ID: <input type="number" id="chatIdInput" value="1">
+    Nickname: <input type="text" id="nicknameInput" value="User1">
+    <button id="joinBtn">Join Chat</button>
+</div>
+
+<div id="chat" style="display:none;"></div>
+<input type="text" id="msgInput" placeholder="Type a message..." style="display:none;">
+<button id="sendBtn" style="display:none;">Send</button>
+
+<!-- SockJS и STOMP -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+
+<script>
+    let stompClient;
+    let chatDiv = document.getElementById("chat");
+    let msgInput = document.getElementById("msgInput");
+    let sendBtn = document.getElementById("sendBtn");
+    let joinBtn = document.getElementById("joinBtn");
+
+    let selectedChatId;
+    let nickname;
+
+    joinBtn.onclick = async function() {
+        selectedChatId = document.getElementById("chatIdInput").value.trim();
+        nickname = document.getElementById("nicknameInput").value.trim();
+        if (!selectedChatId || !nickname) {
+            alert("Введите Chat ID и ник");
+            return;
+        }
+
+        chatDiv.innerHTML = ""; // очищаем чат
+
+        // 1️⃣ Подгружаем историю сообщений через REST
+        try {
+            const response = await fetch(`http://localhost:8080/api/chat/${selectedChatId}/messages`);
+            if (!response.ok) throw new Error("Ошибка загрузки истории: " + response.status);
+            const history = await response.json();
+            console.log("История сообщений:", history);
+            history.forEach(msg => {
+                const msgElem = document.createElement("div");
+                msgElem.classList.add("message");
+                msgElem.classList.add(msg.username === nickname ? "self" : "other");
+                msgElem.textContent = msg.username + ": " + msg.content;
+                chatDiv.appendChild(msgElem);
+            });
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        } catch (err) {
+            console.error(err);
+            alert("Не удалось загрузить историю сообщений. Проверьте консоль.");
+        }
+
+        // 2️⃣ Подключаем STOMP
+        const socket = new SockJS('http://localhost:8080/ws/chat');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function(frame) {
+            console.log("STOMP Connected: " + frame);
+
+            stompClient.subscribe('/topic/messages.' + selectedChatId, function(message) {
+                const msg = JSON.parse(message.body);
+                const msgElem = document.createElement("div");
+                msgElem.classList.add("message");
+                msgElem.classList.add(msg.username === nickname ? "self" : "other");
+                msgElem.textContent = msg.username + ": " + msg.content;
+                chatDiv.appendChild(msgElem);
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+            });
+        });
+
+        // Показываем чат
+        document.getElementById("login").style.display = "none";
+        chatDiv.style.display = "flex";
+        msgInput.style.display = "inline-block";
+        sendBtn.style.display = "inline-block";
+        msgInput.focus();
+    };
+
+    // Отправка сообщений
+    sendBtn.onclick = function() {
+        const content = msgInput.value.trim();
+        if (!content) return;
+        if (!stompClient || !stompClient.connected) {
+            alert("Сначала присоединитесь к чату");
+            return;
+        }
+
+        const msg = {
+            chatId: selectedChatId,
+            username: nickname,
+            content: content
+        };
+
+        stompClient.send("/app/send", {}, JSON.stringify(msg));
+        msgInput.value = "";
+    };
+
+    // Enter для отправки
+    msgInput.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") sendBtn.click();
+    });
+</script>
+</body>
+</html>
