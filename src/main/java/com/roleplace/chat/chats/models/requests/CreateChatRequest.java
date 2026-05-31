@@ -1,28 +1,22 @@
 package com.roleplace.chat.chats.models.requests;
 
-import com.roleplace.chat.users.models.User;
+import com.roleplace.chat.users.models.UserDTO;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Getter;
+import lombok.NonNull;
 
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
 public class CreateChatRequest {
     @NotBlank
-    private String name;
-    @NotBlank
-    private User creator;
-    private List<User> members;
+    private final String name;
+    @NonNull
+    private final List<UserDTO> members;
 
-    public CreateChatRequest(String name, User creator)
+    public CreateChatRequest(String name, @NonNull List<UserDTO> members)
     {
         this.name = name;
-        this.creator = creator;
-    }
-    public CreateChatRequest(String name, User creator, List<User> members)
-    {
-        this(name, creator);
         this.members = members;
     }
 }

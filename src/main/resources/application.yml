@@ -1,0 +1,21 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chat_db
+    username: postgres
+    password: 1
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  docker:
+    compose:
+      enabled: true
+
+jwt:
+  secret: niggers-and-peoples-are-absolutely-equals
+  expiration: 3600000

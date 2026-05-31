@@ -1,19 +1,17 @@
 package com.roleplace.chat.chats.models;
 
-import com.roleplace.chat.users.models.User;
-import com.roleplace.chat.messages.message.models.MessageDTO;
+import com.roleplace.chat.messages.message.models.Message;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
-import java.util.List;
 
 @Setter
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatDTO {
-    private UUID id;
+    private long id;
     private String name;
-    private List<MessageDTO> messages;
-    private List<User> users;
-
+    private Message lastMessage;
 }

@@ -21,12 +21,12 @@ public class UserEventListener {
     @KafkaListener(topics = "user-registered", groupId = "user-group")
     public void handle(UserRegisteredEvent event) {
         logger.info("User {} joined the chat", event.getLogin());
-        createUser(event.getUserId(), event.getLogin());
+        createUser(event.getUserId(), event.getLogin(), event.getLogin());
     }
 
-    private void createUser(UUID userId, String login)
+    private void createUser(UUID userId, String login, String tag)
     {
-        User user = new User(userId, login);
+        User user = new User(userId,login, tag, false);
         userDataService.save(user);
     }
 

@@ -3,7 +3,7 @@ FROM gradle:8.5-jdk21 AS build
 
 WORKDIR /app
 COPY libs libs
-COPY chat-service chat-service
+COPY . chat-service
 WORKDIR /app/chat-service
 RUN chmod +x gradlew
 RUN ./gradlew clean build -x test

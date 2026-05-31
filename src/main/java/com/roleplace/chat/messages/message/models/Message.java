@@ -1,52 +1,48 @@
 package com.roleplace.chat.messages.message.models;
 
+import com.roleplace.chat.chats.models.Chat;
 import com.roleplace.chat.users.models.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Message {
 
-    public Message() {
-        this(null);
-    }
-    public Message(String message) {
-        this(null, message);
-    }
-    public Message(User sender, String message) {
-        this(0L, sender, message);
-    }
+    @EmbeddedId
+    private MessageId id;
 
-    public Message(long chatId, User sender, String message) {
-        this.chatId = chatId;
-        this.username = sender;
-        content = message;
-        timestamp = LocalDateTime.now();
-    }
-
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JdbcTypeCode(SqlTypes.BIGINT)
-    private long id;
-
-    @Id
-    private long chatId;
+    @ManyToOne
+    @MapsId("chatId")
+    @JoinColumn(name = "chat_id")
+    @NonNull
+    private Chat chat;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    private User username;
+    @JoinColumn(name = "sender_id")
+    @NonNull
+    private User sender;
 
+    @Column
+    @NonNull
     private String content;
-    private long replyId;
+    @Column
+    private Long replyId;
+    @Column
+    @NonNull
+    private LocalDateTime createdAt;
 
-    private LocalDateTime timestamp;
-
+    public Message(MessageId id, @NonNull Chat chat, @NonNull User sender, @NonNull String content, @NonNull LocalDateTime createdAt)
+    {
+        this.id = id;
+        this.chat = chat;
+        this.sender = sender;
+        this.content = content;
+        this.createdAt = createdAt;
+    }
 }

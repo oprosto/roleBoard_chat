@@ -1,11 +1,8 @@
 package com.roleplace.chat.users.models;
 
-import com.roleplace.chat.chats.models.Chat;
+import com.roleplace.chat.aggregators.membership.Membership;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,38 +11,28 @@ import java.util.UUID;
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
-
-    public User(UUID userId)
-    {
-        id = userId;
-        isLocked = false;
-    }
-    public User(UUID userId, String username)
-    {
-        this(userId);
-        this.username = username;
-    }
-
     @Id
     private UUID id;
 
+    @Column(nullable = false)
+    private String nickname;
+
     @Column(unique = true, nullable = false)
-    @NotBlank
-    private String username;
+    private String userTag;
 
-    @Column
-    private boolean isLocked;
+    @Column(nullable = false)
+    private Boolean locked;
 
-    @ManyToMany
-    @JoinTable(
-            name = "memberships",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "chat_id")
-    )
-    private List<Chat> chats;
-    //TODO сделать отдельную сущность для бд
-    //@OneToMany(mappedBy = "user")
-    //private List<ChatMember> memberships;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Membership> memberships;
+
+    public User(UUID id, String nickname, String userTag, Boolean isLocked)
+    {
+        this.id = id;
+        this.nickname = nickname;
+        this.userTag = userTag;
+        this.locked = isLocked;
+    }
 }

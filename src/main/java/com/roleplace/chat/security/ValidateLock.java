@@ -16,8 +16,8 @@ public class ValidateLock implements TokenValidator {
 
     @Override
     public void validate(Claims claims) {
-        User user = userRepository.findFirstByUsername(claims.getSubject());
-        if (user.isLocked())
+        User user = userRepository.findFirstByUserTag(claims.getSubject());
+        if (user.getLocked())
             throw new JwtException("User is blocked");
     }
 }

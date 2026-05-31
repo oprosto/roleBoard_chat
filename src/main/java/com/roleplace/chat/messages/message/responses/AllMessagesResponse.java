@@ -1,6 +1,6 @@
-package com.roleplace.chat.messages.message.models.responses;
+package com.roleplace.chat.messages.message.responses;
 
-import com.roleplace.chat.messages.message.models.MessageDTO;
+import com.roleplace.chat.messages.message.models.DTO.MessageDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

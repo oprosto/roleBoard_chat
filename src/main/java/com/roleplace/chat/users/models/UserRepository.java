@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
-    User findFirstByUsername(String username);
+    User findFirstByUserTag(String tag);
     User findFirstById(UUID userId);
 }

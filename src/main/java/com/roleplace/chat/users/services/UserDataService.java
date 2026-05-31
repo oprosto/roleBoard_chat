@@ -5,6 +5,8 @@ import com.roleplace.chat.users.models.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserDataService {
@@ -15,4 +17,11 @@ public class UserDataService {
     {
         userRepository.save(user);
     }
+
+    public User findById(UUID id)
+    {
+        return userRepository.findFirstById(id);
+    }
+
+    public User getReferenceById(UUID id){return userRepository.getReferenceById(id);}
 }

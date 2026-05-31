@@ -1,8 +1,8 @@
 package com.roleplace.chat.users.services;
 
+import com.roleplace.chat.aggregators.membership.MembershipRepository;
 import com.roleplace.chat.chats.models.Chat;
 import com.roleplace.chat.users.models.User;
-import com.roleplace.chat.users.models.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +12,15 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class UserService {
-    UserRepository userRepository;
+    private final UserDataService userDataService;
+    private final MembershipRepository membershipRepository;
 
-    public List<Chat> getAllChats(UUID userId)
-    {
-        User user = userRepository.findFirstById(userId);
-        return user.getChats();
+    //TODO добавить кэширование
+    public List<Chat> getAllChats(UUID userId) {
+        return membershipRepository.findUserChats(userId);
+    }
+
+    public User findById(UUID id) {
+        return userDataService.findById(id);
     }
 }
