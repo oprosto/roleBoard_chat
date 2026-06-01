@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import security.lib.token.model.TokenValidator;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @Component
 public class ValidateLock implements TokenValidator {
@@ -16,7 +18,7 @@ public class ValidateLock implements TokenValidator {
 
     @Override
     public void validate(Claims claims) {
-        User user = userRepository.findFirstByUserTag(claims.getSubject());
+        User user = userRepository.findFirstById(UUID.fromString(claims.getSubject()));
         if (user.getLocked())
             throw new JwtException("User is blocked");
     }
