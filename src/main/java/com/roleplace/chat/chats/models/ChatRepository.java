@@ -23,4 +23,16 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     @Query("SELECT c.chat FROM Membership c WHERE c.id.userId = :userId")
     List<Chat> findAllByUserId(@Param("userId") UUID id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "INSERT INTO membership(chat_id, user_id) VALUES (:chatId, unnest(:userIds)) ON CONFLICT (chat_id, user_id) do nothing", nativeQuery = true)
+    void addUsers(@Param("chatId") Long chatId, @Param("userIds") UUID[] ids);
+
+    @Transactional
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "delete from membership where chat_id = :chatId and user_id IN :userIds", nativeQuery = true)
+    void removeUsers(@Param("chatId") Long chatId, @Param("userIds") List<UUID> userIds);
+
+    Boolean existsById(long id);
 }

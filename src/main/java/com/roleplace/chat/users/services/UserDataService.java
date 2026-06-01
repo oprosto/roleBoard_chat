@@ -4,7 +4,11 @@ import com.roleplace.chat.users.models.User;
 import com.roleplace.chat.users.models.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tools.CollectionTools;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -24,4 +28,11 @@ public class UserDataService {
     }
 
     public User getReferenceById(UUID id){return userRepository.getReferenceById(id);}
+
+    public Set<UUID> getUsersById(List<UUID> ids)
+    {
+        if (CollectionTools.isEmpty(ids))
+            return HashSet.newHashSet(0);
+        return userRepository.findAllById(ids);
+    }
 }

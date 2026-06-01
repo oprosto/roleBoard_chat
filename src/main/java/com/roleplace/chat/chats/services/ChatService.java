@@ -6,14 +6,18 @@ import com.roleplace.chat.chats.models.Chat;
 import com.roleplace.chat.chats.models.requests.CreateChatRequest;
 import com.roleplace.chat.messages.message.models.Message;
 import com.roleplace.chat.messages.message.models.MessageRepository;
+import com.roleplace.chat.users.services.UserDataService;
 import exceptions.DBException;
+import exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
+import tools.CollectionTools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -23,6 +27,7 @@ public class ChatService {
     private final CacheManager cacheManager;
     private final MessageRepository messageRepository;
     private final MembershipService membershipService;
+    private final UserDataService userDataService;
 
     //TODO REWORK
     public Message handleMessage(Message msg) {
@@ -62,7 +67,7 @@ public class ChatService {
         }
     }
      **/
-    public List<Message> getMessagesByChatId(long chatId) {
+    public List<Message> getMessagesByChatId(Long chatId) {
         //Chat chat = chatDataService.findFirstById(chatId);
         //return getMessagesByChat(chat);
         return chatDataService.getAllMessagesById(chatId);
@@ -71,9 +76,9 @@ public class ChatService {
     public Chat createChat(CreateChatRequest request) throws DBException {
         Chat chat;
 
-        chat = new Chat(request.getName());
+        chat = new Chat(request.name());
 
-        List<Membership> memberships = membershipService.createMemberships(chat ,request.getMembers());
+        List<Membership> memberships = membershipService.createMemberships(chat ,request.members().usersId());
 
         chat.setMemberships(memberships);
 
@@ -93,7 +98,31 @@ public class ChatService {
         return id;
     }
 
-    public Chat findById(long id)
+    public void addUsers(Long chatId, List<UUID> users) throws NotFoundException {
+        if (!chatDataService.isExist(chatId))
+            throw new NotFoundException("Чат", chatId.toString());
+        Set<UUID> existedUsers = userDataService.getUsersById(users);
+        List<UUID> missed = users.stream()
+                .filter(id -> !existedUsers.contains(id))
+                .toList();
+        if (!CollectionTools.isEmpty(missed))
+            throw new NotFoundException("Пользователь", missed.toString());
+        chatDataService.addUsers(chatId, users);
+    }
+
+    public void removeUsers(Long chatId, List<UUID> users) throws NotFoundException {
+        if (!chatDataService.isExist(chatId))
+            throw new NotFoundException("Чат", chatId.toString());
+        Set<UUID> existedUsers = userDataService.getUsersById(users);
+        List<UUID> missed = users.stream()
+                .filter(id -> !existedUsers.contains(id))
+                .toList();
+        if (!CollectionTools.isEmpty(missed))
+            throw new NotFoundException("Пользователь", missed.toString());
+        chatDataService.removeUsers(chatId, users);
+    }
+
+    public Chat findById(Long id)
     {
         return chatDataService.findFirstById(id);
     }

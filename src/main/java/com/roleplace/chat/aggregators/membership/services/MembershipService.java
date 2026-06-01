@@ -3,7 +3,6 @@ package com.roleplace.chat.aggregators.membership.services;
 import com.roleplace.chat.aggregators.membership.Membership;
 import com.roleplace.chat.aggregators.membership.MembershipId;
 import com.roleplace.chat.chats.models.Chat;
-import com.roleplace.chat.users.models.UserDTO;
 import com.roleplace.chat.users.services.UserDataService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,10 +21,10 @@ public class MembershipService {
                 userDataService.getReferenceById(userId), chat);
     }
 
-    public List<Membership> createMemberships(Chat chat, List<UserDTO> userIds) {
+    public List<Membership> createMemberships(Chat chat, List<UUID> userIds) {
         List<Membership> memberships = new ArrayList<>();
-        for (UserDTO userId : userIds)
-            memberships.add(createMembership(chat, userId.getId()));
+        for (UUID userId : userIds)
+            memberships.add(createMembership(chat, userId));
         return memberships;
     }
 }

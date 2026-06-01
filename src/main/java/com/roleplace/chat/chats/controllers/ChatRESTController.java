@@ -11,10 +11,13 @@ import com.roleplace.chat.messages.message.models.DTO.MessageDTO;
 import com.roleplace.chat.messages.message.models.Message;
 import com.roleplace.chat.messages.message.responses.AllMessagesResponse;
 import com.roleplace.chat.users.models.UserDTO;
+import com.roleplace.chat.users.models.request.ManyUsersRequest;
 import exceptions.DBException;
+import exceptions.NotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,15 +48,6 @@ public class ChatRESTController {
         return new ResponseEntity<>(new ChatResponse(toDTO(chat)), HttpStatus.CREATED);
     }
 
-    private MessageDTO getMessageDto(Message message)
-    {
-        MessageDTO dto =new MessageDTO();
-        dto.setChatId(message.getId().getChatId());
-        dto.setUser(new UserDTO(message.getSender().getId(), message.getSender().getNickname()));
-        dto.setContent(message.getContent());
-        dto.setCreatedAt(message.getCreatedAt());
-        return dto;
-    }
     @GetMapping("/{userId}")
     public ResponseEntity<AllChatsResponse> getChats(@PathVariable UUID userId)
     {
@@ -62,9 +56,51 @@ public class ChatRESTController {
                 , HttpStatus.OK) ;
     }
 
+    @PostMapping("/add/users/{chatId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addUsersToChat(@PathVariable long chatId, @Valid @RequestBody ManyUsersRequest users)
+    {
+        try{
+            chatService.addUsers(chatId, users.usersId());
+        }catch (NotFoundException e)
+        {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, e.getCause());
+        }
+        catch (RuntimeException e)
+        {
+            throw new ErrorResponseException(HttpStatus.INTERNAL_SERVER_ERROR, e.getCause());
+        }
+    }
+    @PostMapping("/remove/users/{chatId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeUsersFromChat(@PathVariable long chatId, @Valid @RequestBody ManyUsersRequest users)
+    {
+        try{
+            chatService.removeUsers(chatId, users.usersId());
+        }catch (NotFoundException e)
+        {
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, e.getCause());
+        }
+        catch (RuntimeException e)
+        {
+            throw new ErrorResponseException(HttpStatus.INTERNAL_SERVER_ERROR, e.getCause());
+        }
+    }
+
+
+
     private ChatDTO toDTO(Chat chat)
     {
         return new ChatDTO(chat.getId(), chat.getName(), chat.getLastMessage());
+    }
+    private MessageDTO getMessageDto(Message message)
+    {
+        MessageDTO dto =new MessageDTO();
+        dto.setChatId(message.getId().getChatId());
+        dto.setUser(new UserDTO(message.getSender().getId(), message.getSender().getNickname()));
+        dto.setContent(message.getContent());
+        dto.setCreatedAt(message.getCreatedAt());
+        return dto;
     }
 //    @PostMapping("/upload/{chatId}")  
 //    public ResponseEntity<AttachmentResponse> uploadFile(@RequestParam("file") MultipartFile file,
