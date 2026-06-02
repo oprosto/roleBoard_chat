@@ -1,9 +1,9 @@
 package com.roleplace.chat.chats.controllers;
 
-import com.roleplace.chat.messages.message.models.Message;
-import com.roleplace.chat.messages.message.services.MessageService;
-import com.roleplace.chat.messages.message.models.DTO.MessageDTO;
 import com.roleplace.chat.chats.services.ChatService;
+import com.roleplace.chat.messages.message.models.Message;
+import com.roleplace.chat.messages.message.models.request.MessageRequest;
+import com.roleplace.chat.messages.message.services.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,13 +19,13 @@ public class ChatWSController {
     private final MessageService messageService;
 
     @Transactional
-    @MessageMapping("/send")
-    public void sendMessage(MessageDTO messageDTO) {
+    @MessageMapping("/receive")
+    public void receiveMessage(MessageRequest messageDTO) {
         Message message = messageParser(messageDTO);
         chatService.handleMessage(message);
         template.convertAndSend("/topic/messages." + message.getId().getChatId(), messageDTO);
     }
-    private Message messageParser(MessageDTO messageDTO) {
+    private Message messageParser(MessageRequest messageDTO) {
         return messageService.createMessage(messageDTO);
     }
 }
