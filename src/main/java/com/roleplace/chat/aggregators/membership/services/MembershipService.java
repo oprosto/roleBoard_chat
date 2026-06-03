@@ -7,8 +7,8 @@ import com.roleplace.chat.users.services.UserDataService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -21,8 +21,8 @@ public class MembershipService {
                 userDataService.getReferenceById(userId), chat);
     }
 
-    public List<Membership> createMemberships(Chat chat, List<UUID> userIds) {
-        List<Membership> memberships = new ArrayList<>();
+    public Set<Membership> createMemberships(Chat chat, Set<UUID> userIds) {
+        Set<Membership> memberships = new HashSet<>();
         for (UUID userId : userIds)
             memberships.add(createMembership(chat, userId));
         return memberships;

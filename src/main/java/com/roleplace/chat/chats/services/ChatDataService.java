@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import tools.CollectionTools;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -28,7 +29,7 @@ public class ChatDataService {
         chatRepository.updateLastMessageId(chatId, messageId);
     }
     public List<Message> getAllMessagesById(long id){return chatRepository.findAllByIdOrderByTimestampDesc(id);}
-    public List<Chat> getAllChatsByUser(UUID id){return chatRepository.findAllByUserId(id);}
+    public Set<Chat> getAllChatsByUser(UUID id){return chatRepository.findAllByUserId(id);}
     public void addUsers(Long chatId, List<UUID> userIds){
         if (chatId == null)
             return;

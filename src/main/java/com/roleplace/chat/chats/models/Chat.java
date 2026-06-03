@@ -4,9 +4,12 @@ import com.roleplace.chat.aggregators.membership.Membership;
 import com.roleplace.chat.messages.message.models.Message;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -24,7 +27,7 @@ public class Chat {
     private String name;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Membership> memberships;
+    private Set<Membership> memberships;
 
     @Column
     private long maxMessageId = 0;

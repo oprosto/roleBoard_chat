@@ -12,7 +12,6 @@ import com.roleplace.chat.messages.message.models.Message;
 import com.roleplace.chat.messages.message.responses.AllMessagesResponse;
 import com.roleplace.chat.users.models.UserDTO;
 import com.roleplace.chat.users.models.request.ManyUsersRequest;
-import exceptions.DBException;
 import exceptions.NotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,6 +20,7 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -35,25 +35,36 @@ public class ChatRESTController {
     }
 
     @GetMapping("/{chatId}/messages")
-    public ResponseEntity<AllMessagesResponse> getChatMessages(@PathVariable long chatId) {
-        List<Message> messages = chatService.getMessagesByChatId(chatId);
-        return (ResponseEntity<AllMessagesResponse>) new ResponseEntity(
-                new AllMessagesResponse( messages.stream()
-                        .map(this::getMessageDto)
-                        .collect(Collectors.<MessageDTO>toList())), HttpStatus.OK);
+    public ResponseEntity<?> getChatMessages(@PathVariable long chatId) {
+        try {
+            List<Message> messages = chatService.getMessagesByChatId(chatId);
+            return ResponseEntity.ok(new AllMessagesResponse(messages.stream()
+                    .map(this::getMessageDTO)
+                    .collect(Collectors.<MessageDTO>toList())));
+        } catch (NotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     @PostMapping("/create")
-    public ResponseEntity<ChatResponse> createChat(@Valid @RequestBody CreateChatRequest request) throws DBException {
-        Chat chat = chatService.createChat(request);
-        return new ResponseEntity<>(new ChatResponse(toDTO(chat)), HttpStatus.CREATED);
+    public ResponseEntity<?> createChat(@Valid @RequestBody CreateChatRequest request) {
+        try {
+            Chat chat = chatService.createChat(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ChatResponse(getChatDTO(chat)));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<AllChatsResponse> getChats(@PathVariable UUID userId)
+    public ResponseEntity<?> getChats(@PathVariable UUID userId)
     {
-        List<Chat> chats = chatService.getChatsByUser(userId);
-        return new ResponseEntity<>(new AllChatsResponse(chats.stream().map(this::toDTO).toList())
-                , HttpStatus.OK) ;
+        try {
+            Set<Chat> chats = chatService.getChatsByUser(userId);
+            return ResponseEntity.ok()
+                    .body(new AllChatsResponse(chats.stream().map(this::getChatDTO).toList()));
+        } catch (NotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/add/users/{chatId}")
@@ -61,7 +72,7 @@ public class ChatRESTController {
     public void addUsersToChat(@PathVariable long chatId, @Valid @RequestBody ManyUsersRequest users)
     {
         try{
-            chatService.addUsers(chatId, users.usersId());
+            chatService.addUsers(chatId, users.usersId().stream().toList());
         }catch (NotFoundException e)
         {
             throw new ErrorResponseException(HttpStatus.BAD_REQUEST, e.getCause());
@@ -76,7 +87,7 @@ public class ChatRESTController {
     public void removeUsersFromChat(@PathVariable long chatId, @Valid @RequestBody ManyUsersRequest users)
     {
         try{
-            chatService.removeUsers(chatId, users.usersId());
+            chatService.removeUsers(chatId, users.usersId().stream().toList());
         }catch (NotFoundException e)
         {
             throw new ErrorResponseException(HttpStatus.BAD_REQUEST, e.getCause());
@@ -87,15 +98,17 @@ public class ChatRESTController {
         }
     }
 
-
-
-    private ChatDTO toDTO(Chat chat)
+    private ChatDTO getChatDTO(Chat chat)
     {
-        return new ChatDTO(chat.getId(), chat.getName(), chat.getLastMessage());
+        return new ChatDTO(chat.getId(), chat.getName(), getMessageDTO(chat.getLastMessage()));
     }
-    private MessageDTO getMessageDto(Message message)
+    private MessageDTO getMessageDTO(Message message)
     {
+        if (message == null)
+            return null;
+
         MessageDTO dto =new MessageDTO();
+        dto.setMessageId(message.getId().getMessageId());
         dto.setChatId(message.getId().getChatId());
         dto.setUser(new UserDTO(message.getSender().getId(), message.getSender().getNickname()));
         dto.setContent(message.getContent());

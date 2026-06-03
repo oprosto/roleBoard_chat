@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.CollectionTools;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,10 +26,16 @@ public class UserDataService {
 
     public User getReferenceById(UUID id){return userRepository.getReferenceById(id);}
 
-    public Set<UUID> getUsersById(List<UUID> ids)
+    public List<UUID> getUsersById(List<UUID> ids)
     {
         if (CollectionTools.isEmpty(ids))
-            return HashSet.newHashSet(0);
+            return new ArrayList<>(0);
         return userRepository.findAllById(ids);
+    }
+    public Boolean isExist(UUID userId)
+    {
+        if (userId == null)
+            return false;
+        return userRepository.existsById(userId);
     }
 }
