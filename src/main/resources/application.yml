@@ -16,6 +16,20 @@ spring:
     compose:
       enabled: true
 
+  cloud:
+    aws:
+      # Эндпоинт для подключения (для MinIO или LocalStack)
+      endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+      credentials:
+        # Ваши ключи доступа
+        access-key: minioadmin
+        secret-key: minioadmin
+      s3:
+        # Ключевая настройка для MinIO! Включает path-style addressing.
+        path-style-access-enabled: true
+        bucket: attachments
+        region: eu-west-1
+
 jwt:
   secret: niggers-and-peoples-are-absolutely-equals
   expiration: 3600000

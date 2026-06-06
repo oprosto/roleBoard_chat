@@ -1,11 +1,14 @@
 package com.roleplace.chat.messages.message.models;
 
 import com.roleplace.chat.chats.models.Chat;
+import com.roleplace.chat.messages.attachments.models.Attachment;
 import com.roleplace.chat.users.models.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -38,8 +41,10 @@ public class Message {
     @NonNull
     private LocalDateTime createdAt;
 
-    public Message(MessageId id, @NonNull Chat chat, @NonNull User sender, @NonNull String content, @NonNull LocalDateTime createdAt)
-    {
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Attachment> attachments = new ArrayList<>();
+
+    public Message(MessageId id, @NonNull Chat chat, @NonNull User sender, @NonNull String content, @NonNull LocalDateTime createdAt) {
         this.id = id;
         this.chat = chat;
         this.sender = sender;

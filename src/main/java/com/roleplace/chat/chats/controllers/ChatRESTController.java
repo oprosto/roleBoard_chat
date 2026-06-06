@@ -2,7 +2,6 @@ package com.roleplace.chat.chats.controllers;
 
 
 import com.roleplace.chat.chats.models.Chat;
-import com.roleplace.chat.chats.models.ChatDTO;
 import com.roleplace.chat.chats.models.requests.CreateChatRequest;
 import com.roleplace.chat.chats.models.responses.AllChatsResponse;
 import com.roleplace.chat.chats.models.responses.ChatResponse;
@@ -10,10 +9,10 @@ import com.roleplace.chat.chats.services.ChatService;
 import com.roleplace.chat.messages.message.models.DTO.MessageDTO;
 import com.roleplace.chat.messages.message.models.Message;
 import com.roleplace.chat.messages.message.responses.AllMessagesResponse;
-import com.roleplace.chat.users.models.UserDTO;
 import com.roleplace.chat.users.models.request.ManyUsersRequest;
 import exceptions.NotFoundException;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponseException;
@@ -25,21 +24,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/chat")
 public class ChatRESTController {
 
     private final ChatService chatService;
-
-    public ChatRESTController(ChatService chatService) {
-        this.chatService = chatService;
-    }
 
     @GetMapping("/{chatId}/messages")
     public ResponseEntity<?> getChatMessages(@PathVariable long chatId) {
         try {
             List<Message> messages = chatService.getMessagesByChatId(chatId);
             return ResponseEntity.ok(new AllMessagesResponse(messages.stream()
-                    .map(this::getMessageDTO)
+                    .map(MessageDTO::new)
                     .collect(Collectors.<MessageDTO>toList())));
         } catch (NotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -49,7 +45,7 @@ public class ChatRESTController {
     public ResponseEntity<?> createChat(@Valid @RequestBody CreateChatRequest request) {
         try {
             Chat chat = chatService.createChat(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ChatResponse(getChatDTO(chat)));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ChatResponse(chatService.getChatDTO(chat)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(e.getMessage());
         }
@@ -61,7 +57,7 @@ public class ChatRESTController {
         try {
             Set<Chat> chats = chatService.getChatsByUser(userId);
             return ResponseEntity.ok()
-                    .body(new AllChatsResponse(chats.stream().map(this::getChatDTO).toList()));
+                    .body(new AllChatsResponse(chats.stream().map(chatService::getChatDTO).toList()));
         } catch (NotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -97,28 +93,4 @@ public class ChatRESTController {
             throw new ErrorResponseException(HttpStatus.INTERNAL_SERVER_ERROR, e.getCause());
         }
     }
-
-    private ChatDTO getChatDTO(Chat chat)
-    {
-        return new ChatDTO(chat.getId(), chat.getName(), getMessageDTO(chat.getLastMessage()));
-    }
-    private MessageDTO getMessageDTO(Message message)
-    {
-        if (message == null)
-            return null;
-
-        MessageDTO dto =new MessageDTO();
-        dto.setMessageId(message.getId().getMessageId());
-        dto.setChatId(message.getId().getChatId());
-        dto.setUser(new UserDTO(message.getSender().getId(), message.getSender().getNickname()));
-        dto.setContent(message.getContent());
-        dto.setCreatedAt(message.getCreatedAt());
-        return dto;
-    }
-//    @PostMapping("/upload/{chatId}")  
-//    public ResponseEntity<AttachmentResponse> uploadFile(@RequestParam("file") MultipartFile file,
-//                                                         @PathVariable("chatId") Long chatId)
-//    {
-//        return
-//    }
 }
