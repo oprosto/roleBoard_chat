@@ -29,7 +29,6 @@ public class KafkaConsumerConfig {
         factory.setConsumerFactory(consumerFactory());
         factory.setConcurrency(1);
         factory.getContainerProperties().setPollTimeout(3000);
-        System.out.println("NIGGERS");
         return factory;
     }
 

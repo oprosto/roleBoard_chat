@@ -29,7 +29,13 @@ spring:
         path-style-access-enabled: true
         bucket: attachments
         region: eu-west-1
-
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    com.roleplace: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 jwt:
   secret: niggers-and-peoples-are-absolutely-equals
   expiration: 3600000
