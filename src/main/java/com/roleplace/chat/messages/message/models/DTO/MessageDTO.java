@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -16,6 +17,7 @@ public class MessageDTO {
     private long chatId;
     private UserDTO user;
     private String content;
+    private UUID operationId;
     private LocalDateTime createdAt;
 
     public MessageDTO(Message message) {
@@ -26,5 +28,10 @@ public class MessageDTO {
         this.setUser(new UserDTO(message.getSender().getId(), message.getSender().getNickname()));
         this.setContent(message.getContent());
         this.setCreatedAt(message.getCreatedAt());
+    }
+
+    public MessageDTO(Message message, UUID operationId) {
+        this(message);
+        this.operationId = operationId;
     }
 }

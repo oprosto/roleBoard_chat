@@ -24,7 +24,7 @@ public class MessagesWSController {
     public void receiveMessage(MessageRequest request) {
         Message message = messageParser(request);
         attachmentService.handleAttachments(message);
-        template.convertAndSend("/topic/messages." + message.getId().getChatId(), new MessageDTO(message));
+        template.convertAndSend("/topic/messages." + message.getId().getChatId(), new MessageDTO(message, request.operationId()));
     }
 
     private Message messageParser(MessageRequest request) {
