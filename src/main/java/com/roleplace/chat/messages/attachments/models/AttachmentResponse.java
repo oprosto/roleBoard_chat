@@ -1,7 +1,26 @@
 package com.roleplace.chat.messages.attachments.models;
 
-import org.springframework.web.multipart.MultipartFile;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.UUID;
+
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class AttachmentResponse {
-    MultipartFile messages;
+    //MultipartFile messages;
+    UUID id;            //url в том числе
+    String name;
+    String extension;
+    String type;
+    long size;
+
+    public AttachmentResponse(Attachment attachment)
+    {
+        this(attachment.getId(), attachment.getName(), attachment.getExtension(), attachment.getType(), attachment.getSize());
+    }
 }

@@ -1,12 +1,14 @@
 package com.roleplace.chat.messages.attachments.services;
 
 import com.roleplace.chat.messages.attachments.models.Attachment;
+import com.roleplace.chat.messages.attachments.models.AttachmentResponse;
 import com.roleplace.chat.messages.message.models.Message;
 import com.roleplace.chat.messages.message.services.MessageService;
 import io.awspring.cloud.s3.S3Resource;
 import io.awspring.cloud.s3.S3Template;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -65,11 +67,13 @@ public class AttachmentService {
         return s3Template.createSignedGetURL(bucketName, key, Duration.ofMinutes(5));
     }
 
-    public UUID addFile(MultipartFile file) throws IOException {
+    public AttachmentResponse addFile(MultipartFile file) throws IOException {
         UUID id = uploadFile(file);
-        Attachment attachment = new Attachment(id, file.getName(), file.getContentType(), file.getSize(), LocalDateTime.now());
+        Attachment attachment = new Attachment(id, file.getOriginalFilename(),
+                FilenameUtils.getExtension(file.getOriginalFilename()),
+                file.getContentType(), file.getSize(), LocalDateTime.now());
         attachmentDataService.save(attachment);
-        return id;
+        return new AttachmentResponse(attachment);
     }
 
     @Transactional
@@ -83,7 +87,7 @@ public class AttachmentService {
 
     }
 
-    @Scheduled(cron = "0 0 * * * *") // каждый час
+    @Scheduled(cron = "0 1 * * * *") // каждый час
     @Transactional
     public void cleanOrphanedAttachments() {
         LocalDateTime threshold = LocalDateTime.now().minusHours(24);

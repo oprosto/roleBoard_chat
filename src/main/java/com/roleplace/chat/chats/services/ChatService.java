@@ -7,6 +7,7 @@ import com.roleplace.chat.chats.models.ChatDTO;
 import com.roleplace.chat.chats.models.requests.CreateChatRequest;
 import com.roleplace.chat.messages.message.models.DTO.MessageDTO;
 import com.roleplace.chat.messages.message.models.Message;
+import com.roleplace.chat.users.models.User;
 import com.roleplace.chat.users.services.UserDataService;
 import exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,7 @@ public class ChatService {
     public void addUsers(Long chatId, List<UUID> users) throws NotFoundException {
         if (!chatDataService.isExist(chatId))
             throw new NotFoundException("Чат", chatId.toString());
-        List<UUID> existedUsers = userDataService.getUsersById(users);
+        List<User> existedUsers = userDataService.getUsersById(users);
         List<UUID> missed = users.stream()
                 .filter(id -> !existedUsers.contains(id))
                 .toList();
@@ -57,7 +58,7 @@ public class ChatService {
     public void removeUsers(Long chatId, List<UUID> users) throws NotFoundException {
         if (!chatDataService.isExist(chatId))
             throw new NotFoundException("Чат", chatId.toString());
-        List<UUID> existedUsers = userDataService.getUsersById(users);
+        List<User> existedUsers = userDataService.getUsersById(users);
         List<UUID> missed = users.stream()
                 .filter(id -> !existedUsers.contains(id))
                 .toList();

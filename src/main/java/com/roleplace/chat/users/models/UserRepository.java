@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     User findFirstById(UUID userId);
 
     @Query("SELECT u.id FROM User u WHERE u.id IN :ids")
-    List<UUID> findAllById(@Param("ids") List<UUID> ids);
+    List<User> findAllById(@Param("ids") List<UUID> ids);
 
     boolean existsById(UUID userId);
 }

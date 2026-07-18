@@ -26,7 +26,7 @@ public class UserDataService {
 
     public User getReferenceById(UUID id){return userRepository.getReferenceById(id);}
 
-    public List<UUID> getUsersById(List<UUID> ids)
+    public List<User> getUsersById(List<UUID> ids)
     {
         if (CollectionTools.isEmpty(ids))
             return new ArrayList<>(0);

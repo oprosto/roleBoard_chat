@@ -23,6 +23,9 @@ public class Attachment {
     @Size(max = 255)
     private String name;
     @Column
+    @Size(max = 64)
+    private String extension;
+    @Column
     @Size(max = 128)
     private String type;
     @Column
@@ -39,9 +42,10 @@ public class Attachment {
     @Column
     private LocalDateTime createdAt;
 
-    public Attachment(UUID id, String name, String type, long size, LocalDateTime createdAt) {
+    public Attachment(UUID id, String name, String extension, String type, long size, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
+        this.extension = extension;
         this.type = type;
         this.size = size;
         this.createdAt = createdAt;
