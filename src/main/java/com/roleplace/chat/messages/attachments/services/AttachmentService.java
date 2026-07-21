@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -46,9 +47,9 @@ public class AttachmentService {
     }
 
     // Скачивание файла
-    public S3Resource downloadFile(String key) {
+    public S3Resource downloadFile(UUID key) {
         // download возвращает S3Resource, из которого можно получить InputStream
-        return s3Template.download(bucketName, key);
+        return s3Template.download(bucketName, key.toString());
     }
 
     // Удаление файла
@@ -74,6 +75,12 @@ public class AttachmentService {
                 file.getContentType(), file.getSize(), LocalDateTime.now());
         attachmentDataService.save(attachment);
         return new AttachmentResponse(attachment);
+    }
+
+    public byte[] getFile(UUID id) throws IOException {
+        try (InputStream inputStream = downloadFile(id).getInputStream()) {
+            return StreamUtils.copyToByteArray(inputStream);
+        }
     }
 
     @Transactional

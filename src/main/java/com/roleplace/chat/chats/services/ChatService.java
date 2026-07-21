@@ -46,7 +46,7 @@ public class ChatService {
     public void addUsers(Long chatId, List<UUID> users) throws NotFoundException {
         if (!chatDataService.isExist(chatId))
             throw new NotFoundException("Чат", chatId.toString());
-        List<User> existedUsers = userDataService.getUsersById(users);
+        Set<UUID> existedUsers = userDataService.getExistedUserIds(users);
         List<UUID> missed = users.stream()
                 .filter(id -> !existedUsers.contains(id))
                 .toList();
@@ -58,7 +58,7 @@ public class ChatService {
     public void removeUsers(Long chatId, List<UUID> users) throws NotFoundException {
         if (!chatDataService.isExist(chatId))
             throw new NotFoundException("Чат", chatId.toString());
-        List<User> existedUsers = userDataService.getUsersById(users);
+        Set<UUID> existedUsers = userDataService.getExistedUserIds(users);
         List<UUID> missed = users.stream()
                 .filter(id -> !existedUsers.contains(id))
                 .toList();

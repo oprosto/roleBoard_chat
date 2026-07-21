@@ -32,6 +32,14 @@ public class UserDataService {
             return new ArrayList<>(0);
         return userRepository.findAllById(ids);
     }
+
+    public Set<UUID> getExistedUserIds(Collection<UUID> ids)
+    {
+        if (CollectionTools.isEmpty(ids))
+            return new HashSet<>(0);
+        return userRepository.findExistedUserIds(ids);
+    }
+
     public Boolean isExist(UUID userId)
     {
         if (userId == null)
