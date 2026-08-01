@@ -21,11 +21,15 @@ public class UserEventListener {
     @KafkaListener(topics = "user-registered", groupId = "user-group")
     public void handle(UserRegisteredEvent event) {
         logger.info("User {} joined the chat", event.getLogin());
-        createUser(event.getUserId(), event.getLogin(), event.getLogin());
+        createUser(event.getUserId(), event.getLogin(), event.getTag());
     }
 
     private void createUser(UUID userId, String login, String tag)
     {
+        if (userDataService.isExist(userId)) {
+            logger.debug("User {} already exists; duplicate registration event ignored", userId);
+            return;
+        }
         User user = new User(userId,login, tag, false);
         userDataService.save(user);
     }

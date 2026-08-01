@@ -18,8 +18,15 @@ public class ValidateLock implements TokenValidator {
 
     @Override
     public void validate(Claims claims) {
-        User user = userRepository.findFirstById(UUID.fromString(claims.getSubject()));
-        if (user.getLocked())
+        User user;
+        try {
+            user = userRepository.findById(UUID.fromString(claims.getSubject())).orElse(null);
+        } catch (IllegalArgumentException e) {
+            throw new JwtException("Token subject is invalid", e);
+        }
+        if (user == null)
+            throw new JwtException("Token subject is invalid");
+        if (Boolean.TRUE.equals(user.getLocked()))
             throw new JwtException("User is blocked");
     }
 }
